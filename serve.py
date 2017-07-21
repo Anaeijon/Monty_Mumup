@@ -372,7 +372,12 @@ async def listen_to_function(app,
 
 parser = argparse.ArgumentParser(
     description='Monty Mumup - A Python based MultiUserMUsicPlayer.')
-parser.add_argument('music_directory', help='directory where music is stored')
+parser.add_argument(
+    '--music-directory',
+    dest='music_directory',
+    help='directory where music is stored',
+    default='nopath',
+    type=str)
 parser.add_argument(
     '--port',
     dest='port',
@@ -385,16 +390,34 @@ parser.add_argument(
     default=8080,
     type=int,
     help='port where vlc http backend will be running')
+parser.add_argument(
+    '--vlc-screen',
+    dest='vlc_screen',
+    default='vlc_screen',
+    type=str,
+    help='screen where vlc http backend will be running, None --> no screen')
+parser.add_argument(
+    '--vlc-password',
+    dest='vlc_password',
+    default='pass',
+    type=str,
+    help='password for vlc http interface')
 
 args = parser.parse_args()
 if args.vlc_port == args.port:
     pprint("use another port or set --vlc-port")
     sys.exit()
 
-vlc = VLC(interfaces=(['http']), http_port=args.vlc_port)
+vlc_screen = None if args.vlc_screen == 'None' else args.vlc_screen
+vlc = VLC(
+    interfaces=(['http']),
+    http_port=args.vlc_port,
+    screen_name=vlc_screen,
+    http_password=args.vlc_password)
 vlc.stop()
 vlc.clear()
-vlc.add(MRL(MRL.DIR, args.music_directory))
+if args.music_directory != 'nopath':
+    vlc.add(MRL(MRL.DIR, args.music_directory))
 app = web.Application(loop=loop)
 app['websockets'] = []
 app['player'] = vlc
