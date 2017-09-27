@@ -3,8 +3,6 @@ Serve Mediaplayer Websocket Server.
 
 MIT License
 Copyright (c) 2017 David Döring (https://github.com/Anaeijon)
-see LICENSE file.
-
 This is a synchonous HTTP and Websocket Server to serve Mediaplayer Websocket
     and all needed file for Client Website to interact with Websocket.
 VLC-Player is used as Mediaplayer.
@@ -338,6 +336,7 @@ async def listen_to_playlist(player, app, sleep_time=1, recache_time=10):
             playlist = new_playlist
             for ws in app['websockets']:
                 await ws.send_json({'command': 'playlist', 'value': playlist})
+                await ws.drain()
 
 
 async def listen_to_function(app,
@@ -368,6 +367,7 @@ async def listen_to_function(app,
                     'command': function_name,
                     'value': last_state
                 })
+                await ws.drain()
 
 
 parser = argparse.ArgumentParser(
